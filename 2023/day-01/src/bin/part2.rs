@@ -1,9 +1,8 @@
-use regex::{self, Regex};
 use std::collections::HashMap;
 use std::fs;
 
 fn get_digit(line: &str) -> i32 {
-    let mut digits: Vec<&str> = Vec::new();
+    let mut digits: Vec<String> = Vec::new();
 
     let val_map = HashMap::from([
         ("one", "1"),
@@ -18,22 +17,15 @@ fn get_digit(line: &str) -> i32 {
         // ("zero", "0"),
     ]);
 
-    let number_patterns: Vec<String> = val_map
-        .iter()
-        .map(|(numb_name, numb)| format!("{}|{}", numb_name.to_string(), numb.to_string()))
-        .collect();
-
-    let number_pattern = number_patterns.join("|");
-
-    let pattern_string = format!(r"(?:{})", number_pattern);
-    let pattern = Regex::new(&pattern_string).unwrap();
-
-    for mat in pattern.find_iter(line) {
-        let mat_as_str = mat.as_str();
-        if mat_as_str.len() == 1 {
-            digits.push(mat_as_str);
+    for (index, char) in line.chars().enumerate() {
+        if char.is_numeric() {
+            digits.push(char.to_string());
         } else {
-            digits.push(val_map[mat_as_str]);
+            for val in val_map.keys() {
+                if line[index..].starts_with(val) {
+                    digits.push(val_map.get(val).unwrap().to_string());
+                }
+            }
         }
     }
 
